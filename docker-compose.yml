@@ -1,0 +1,54 @@
+version: '3'
+services:
+  eth-node: 
+    image: ethereum/client-go
+    ports:
+      - '30303:30303'
+      - '3334:3334'
+      - '8545:8545'
+    volumes:
+      - ./data/eth:/root/.ethereum
+    command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334", "--http", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*"]
+  graph-node:
+    image: graphprotocol/graph-node
+    ports:
+      - '8000:8000'
+      - '8001:8001'
+      - '8020:8020'
+      - '8030:8030'
+      - '8040:8040'
+    depends_on:
+      - ipfs
+      - postgres
+      - eth-node
+    environment:
+      postgres_host: postgres
+      postgres_user: eth-graph-node
+      postgres_pass: let-me-in
+      postgres_db: eth-graph-node
+      ipfs: 'ipfs:5001'
+      ethereum: 'mainnet:http://172.19.0.1:8545'
+      GRAPH_LOG: debug
+  ipfs:
+    image: ipfs/go-ipfs
+    ports:
+      - '5001:5001'
+    volumes:
+      - ./data/ipfs:/data/ipfs
+    command: ["daemon", "--writable", "--migrate=true", "--agent-version-suffix=docker"]
+  postgres:
+    image: postgres
+    ports:
+      - '5432:5432'
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements"
+      ]
+    environment:
+      POSTGRES_USER: eth-graph-node
+      POSTGRES_PASSWORD: let-me-in
+      POSTGRES_DB: eth-graph-node
+      PGDATA: "/data/postgres"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
