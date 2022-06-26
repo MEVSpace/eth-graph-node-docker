@@ -4,31 +4,14 @@ services:
     image: ethereum/client-go
     ports:
       - '30303:30303'
-      - '3334:3334'
-      - '8545:8545'
+      - '172.18.0.1:3334:3334'
+      - '172.18.0.1:8545:8545'
     volumes:
       - ./data/eth:/root/.ethereum
-    command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334", "--http", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*"]
-  graph-node:
-    image: graphprotocol/graph-node
-    ports:
-      - '8000:8000'
-      - '8001:8001'
-      - '8020:8020'
-      - '8030:8030'
-      - '8040:8040'
-    depends_on:
-      - ipfs
-      - postgres
-      - eth-node
-    environment:
-      postgres_host: postgres
-      postgres_user: eth-graph-node
-      postgres_pass: let-me-in
-      postgres_db: eth-graph-node
-      ipfs: 'ipfs:5001'
-      ethereum: 'mainnet:http://172.19.0.1:8545'
-      GRAPH_LOG: debug
+    command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334", 
+      "--http", "--http.api", "eth,net,web3,debug", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*",
+      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages"
+      ]
   ipfs:
     image: ipfs/go-ipfs
     ports:
@@ -36,6 +19,8 @@ services:
     volumes:
       - ./data/ipfs:/data/ipfs
     command: ["daemon", "--writable", "--migrate=true", "--agent-version-suffix=docker"]
+    extra_hosts:
+      - "172.18.0.1:host-gateway"
   postgres:
     image: postgres
     ports:
@@ -52,3 +37,26 @@ services:
       PGDATA: "/data/postgres"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+  graph-node:
+    image: graphprotocol/graph-node
+    ports:
+      - '8000:8000'
+      - '8001:8001'
+      - '8020:8020'
+      - '8030:8030'
+      - '8040:8040'
+    depends_on:
+      - ipfs
+      - postgres
+      - eth-node
+    volumes:
+      - ./data/eth:/eth
+    environment:
+      postgres_host: postgres
+      postgres_user: eth-graph-node
+      postgres_pass: let-me-in
+      postgres_db: eth-graph-node
+      RUST_BACKTRACE: 1
+      ipfs: 'ipfs:5001'
+      ethereum: 'mainnet:http://172.18.0.1:8545'
+      GRAPH_LOG: debug
