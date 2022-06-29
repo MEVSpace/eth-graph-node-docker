@@ -1,0 +1,16 @@
+[Unit]
+Description=Ethereum go client
+After=syslog.target network.target
+
+[Service]
+User=root
+Group=root
+Environment=HOME=/root/eth/geth
+Type=simple
+ExecStart=/root/eth/geth-linux-amd64-1.10.19-23bee162/geth --cache 8192 --port 30303 --ws --ws.addr 0.0.0.0 --ws.port 3334 --http --http.api "eth,net,web3,debug" --http.addr 0.0.0.0 --http.port 8545 --http.vhosts "*" --gcmode archive --txlookuplimit 0 --cache.preimages --datadir "/root/eth/data/eth" 
+KillMode=process
+KillSignal=SIGINT
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target
