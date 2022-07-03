@@ -1,26 +1,15 @@
 version: '3'
 services:
-  eth-node: 
-    image: ethereum/client-go
-    ports:
-      - '30303:30303'
-      - '172.18.0.1:3334:3334'
-      - '172.18.0.1:8545:8545'
-    volumes:
-      - ./data/eth:/root/.ethereum
-    command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334", 
-      "--http", "--http.api", "eth,net,web3,debug", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*",
-      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages"
-      ]
   ipfs:
+    #network_mode: "host"
     image: ipfs/go-ipfs
     ports:
       - '5001:5001'
     volumes:
       - ./data/ipfs:/data/ipfs
     command: ["daemon", "--writable", "--migrate=true", "--agent-version-suffix=docker"]
-    extra_hosts:
-      - "172.18.0.1:host-gateway"
+      #extra_hosts:
+      #- "172.18.0.1:host-gateway"
   postgres:
     image: postgres
     ports:
@@ -34,7 +23,7 @@ services:
       POSTGRES_USER: eth-graph-node
       POSTGRES_PASSWORD: let-me-in
       POSTGRES_DB: eth-graph-node
-      PGDATA: "/data/postgres"
+        #PGDATA: "/data/postgres"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
   graph-node:
@@ -48,9 +37,6 @@ services:
     depends_on:
       - ipfs
       - postgres
-      - eth-node
-    volumes:
-      - ./data/eth:/eth
     environment:
       postgres_host: postgres
       postgres_user: eth-graph-node
@@ -58,5 +44,7 @@ services:
       postgres_db: eth-graph-node
       RUST_BACKTRACE: 1
       ipfs: 'ipfs:5001'
-      ethereum: 'mainnet:http://172.18.0.1:8545'
+      ethereum: 'mainnet:http://host.docker.internal:8545'
       GRAPH_LOG: debug
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
