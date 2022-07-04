@@ -27,7 +27,7 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
   graph-node:
-    image: graphprotocol/graph-node
+    image: graph-node
     ports:
       - '8000:8000'
       - '8001:8001'
@@ -45,6 +45,12 @@ services:
       RUST_BACKTRACE: 1
       ipfs: 'ipfs:5001'
       ethereum: 'mainnet:http://host.docker.internal:8545'
+      ETHEREUM_RPC_PARALLEL_REQUESTS: 50000
       GRAPH_LOG: debug
+      GRAPH_EXPERIMENTAL_FETCH_TXN_RECEIPTS_CONCURRENTLY: 10000
+      GRAPH_ETHEREUM_TARGET_TRIGGERS_PER_BLOCK_RANGE: 5000
+      GRAPH_ETHEREUM_BLOCK_INGESTOR_MAX_CONCURRENT_JSON_RPC_CALLS_FOR_TXN_RECEIPTS: 10000
+      GRAPH_ETHEREUM_FETCH_TXN_RECEIPTS_IN_BATCHES: "true"
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
