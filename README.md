@@ -39,4 +39,5 @@ iptables -A OUTPUT -p udp -s 0/0 -d 203.0.113.0/24 -j DROP
 iptables -A OUTPUT -p udp -s 0/0 -d 224.0.0.0/4 -j DROP
 iptables -A OUTPUT -p udp -s 0/0 -d 240.0.0.0/4 -j DROP
   ```
-5. Up the docker-compose
+5. Install `iptables-persistent` to persist iptables data between shutdowns.
+6. Up the docker-compose
