@@ -1,19 +1,29 @@
 version: '3'
 services:
+  eth-node:
+    network_mode: "host"
+    image: ethereum/client-go
+    volumes:
+      - ./data/eth:/root/.ethereum
+    command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334",
+      "--http", "--http.api", "eth,net,web3,debug", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*",
+      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages", "--vmodule", "rpc=5"
+      ]
   ipfs:
-    #network_mode: "host"
+    network_mode: "host"
     image: ipfs/go-ipfs
-    ports:
-      - '5001:5001'
+      #ports:
+      #- '5001:5001'
     volumes:
       - ./data/ipfs:/data/ipfs
     command: ["daemon", "--writable", "--migrate=true", "--agent-version-suffix=docker"]
       #extra_hosts:
       #- "172.18.0.1:host-gateway"
   postgres:
+    network_mode: "host"
     image: postgres
-    ports:
-      - '5432:5432'
+      #ports:
+      #- '5432:5432'
     command:
       [
         "postgres",
@@ -28,29 +38,28 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
   graph-node:
     image: graph-node
-    ports:
-      - '8000:8000'
-      - '8001:8001'
-      - '8020:8020'
-      - '8030:8030'
-      - '8040:8040'
+    network_mode: "host"
+      #    ports:
+      #- '8000:8000'
+      #- '8001:8001'
+      #- '8020:8020'
+      #- '8030:8030'
+      #- '8040:8040'
     depends_on:
       - ipfs
       - postgres
+      - eth-node
     environment:
-      postgres_host: postgres
+      postgres_host: "localhost"
       postgres_user: eth-graph-node
       postgres_pass: let-me-in
       postgres_db: eth-graph-node
       RUST_BACKTRACE: 1
-      ipfs: 'ipfs:5001'
-      ethereum: 'mainnet:http://host.docker.internal:8545'
+      ipfs: 'localhost:5001'
+      ethereum: 'mainnet:http://localhost:8545'
       ETHEREUM_RPC_PARALLEL_REQUESTS: 50000
-      GRAPH_LOG: debug
-      GRAPH_EXPERIMENTAL_FETCH_TXN_RECEIPTS_CONCURRENTLY: 10000
-      GRAPH_ETHEREUM_TARGET_TRIGGERS_PER_BLOCK_RANGE: 5000
-      GRAPH_ETHEREUM_BLOCK_INGESTOR_MAX_CONCURRENT_JSON_RPC_CALLS_FOR_TXN_RECEIPTS: 10000
-      GRAPH_ETHEREUM_FETCH_TXN_RECEIPTS_IN_BATCHES: "true"
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      GRAPH_LOG: trace
+      GRAPH_EXPERIMENTAL_FETCH_TXN_RECEIPTS_CONCURRENTLY: 5000
+      GRAPH_ETHEREUM_TARGET_TRIGGERS_PER_BLOCK_RANGE: 1000
+      GRAPH_ETHEREUM_BLOCK_INGESTOR_MAX_CONCURRENT_JSON_RPC_CALLS_FOR_TXN_RECEIPTS: 1000
+      GRAPH_ETHEREUM_FETCH_TXN_RECEIPTS_IN_BATCHES: "false"
