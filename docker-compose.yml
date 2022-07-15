@@ -7,7 +7,7 @@ services:
       - ./data/eth:/root/.ethereum
     command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334",
       "--http", "--http.api", "eth,net,web3,debug", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*",
-      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages", "--vmodule", "--rpc.gascap=0", "--rpc.txfeecap=0"
+      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages",  "--rpc.gascap", "0", "--rpc.txfeecap", "0"
       ]
   ipfs:
     network_mode: "host"
