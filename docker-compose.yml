@@ -7,7 +7,7 @@ services:
       - ./data/eth:/root/.ethereum
     command: ["--port", "30303", "--ws", "--ws.addr", "0.0.0.0", "--ws.port", "3334",
       "--http", "--http.api", "eth,net,web3,debug", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.vhosts", "*",
-      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages", "--vmodule", "rpc=5"
+      "--gcmode", "archive", "--txlookuplimit", "0", "--cache.preimages", "--vmodule", "--rpc.gascap=0", "--rpc.txfeecap=0"
       ]
   ipfs:
     network_mode: "host"
@@ -56,10 +56,11 @@ services:
       postgres_db: eth-graph-node
       RUST_BACKTRACE: 1
       ipfs: 'localhost:5001'
-      ethereum: 'mainnet:http://localhost:8545'
+      ethereum: 'mainnet:http://88.99.195.178:8545'
+      ETHEREUM_BLOCK_BATCH_SIZE: 1000
       ETHEREUM_RPC_PARALLEL_REQUESTS: 50000
       GRAPH_LOG: trace
-      GRAPH_EXPERIMENTAL_FETCH_TXN_RECEIPTS_CONCURRENTLY: 5000
+      GRAPH_EXPERIMENTAL_FETCH_TXN_RECEIPTS_CONCURRENTLY: 50000
       GRAPH_ETHEREUM_TARGET_TRIGGERS_PER_BLOCK_RANGE: 1000
-      GRAPH_ETHEREUM_BLOCK_INGESTOR_MAX_CONCURRENT_JSON_RPC_CALLS_FOR_TXN_RECEIPTS: 1000
+      GRAPH_ETHEREUM_BLOCK_INGESTOR_MAX_CONCURRENT_JSON_RPC_CALLS_FOR_TXN_RECEIPTS: 10000
       GRAPH_ETHEREUM_FETCH_TXN_RECEIPTS_IN_BATCHES: "false"
